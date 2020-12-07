@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[1]:
+# In[ ]:
 
 
 from functools import partial # for trials
@@ -36,7 +36,7 @@ import pandas as pd
 import time
 
 
-# In[2]:
+# In[ ]:
 
 
 # set data and checkpoint locations
@@ -171,7 +171,7 @@ gpu_use = 1
 # r = [comb for comb in product(a, b, d)]
 # print(r)
 
-# In[3]:
+# In[ ]:
 
 
 # move data into sets for loading
@@ -186,7 +186,7 @@ def load_data(data_dir=d.absolute()):
     return trainset, testset
 
 
-# In[4]:
+# In[ ]:
 
 
 # dynamically-generated nn that takes a 3-channel image and outputs a label
@@ -231,7 +231,7 @@ class Net(nn.Module):
         return x
 
 
-# In[5]:
+# In[ ]:
 
 
 # train nn on data
@@ -328,7 +328,7 @@ def train_cifar(neuron_config, checkpoint_dir=None):
     print("Finished Training")
 
 
-# In[6]:
+# In[ ]:
 
 
 # get accuracy score
@@ -352,7 +352,7 @@ def test_accuracy(net, device="cpu"):
     return correct / total
 
 
-# In[7]:
+# In[ ]:
 
 
 #determine configuration boundary for nn based on number of layers
@@ -396,7 +396,7 @@ def configure_neurons(num_convs,num_fcs):
 # neuron_config_space = configure_neurons()
 # print(neuron_config_space)
 
-# In[8]:
+# In[ ]:
 
 
 # perform neuron configuration trials
@@ -484,7 +484,7 @@ def search_neurons(layer_config, checkpoint_dir=None):
     return best_trained_model.state_dict()
 
 
-# In[9]:
+# In[ ]:
 
 
 # perform layer count trials
@@ -571,7 +571,7 @@ layer_config_space["num_convs"] = 2
 layer_config_space["num_fcs"] = np.random.randint(3,2**2)
 
 cpu_use = 1
-gpu_use = 0.25
+gpu_use = 0.0
 # data_dir = os.path.abspath("/home/grottesco/Source/RayTuneTut/data/")
 # checkpoint_dir = os.path.abspath("/home/grottesco/Source/RayTuneTut/checkpoints")
 print("Resource usage can be viewed at 127.0.0.1:8265")

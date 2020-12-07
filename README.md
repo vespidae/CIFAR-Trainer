@@ -1,7 +1,7 @@
 # CIFAR-Trainer
-BOHB-based model builder for CIFAR
+BOHB-based model builder for CIFAR CNN
 
-Requirements:
+## Requirements
 - numpy
 - torch
 - torchvision
@@ -13,4 +13,5 @@ Requirements:
 - hpbandster
 - scikit-learn
 
-Run notebook "AutoML CNN Demo.ipynb" for a demo.
+## Demonstration
+Run notebook "AutoML CNN Demo.ipynb" or script "AutoML CNN Demo.py" for a demo.
