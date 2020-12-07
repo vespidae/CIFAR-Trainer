@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[22]:
+# In[1]:
 
 
 from functools import partial # for trials
@@ -26,16 +26,17 @@ from pathlib import Path # for OS agnostic path definition
 
 # import itertools package 
 import itertools 
-from itertools import combinations, combinations_with_replacement
+from itertools import permutations
 from itertools import product
 
 import math
+
 import pandas as pd
 
-# from sklearn import preprocessing
+import time
 
 
-# In[3]:
+# In[2]:
 
 
 # set data and checkpoint locations
@@ -50,205 +51,127 @@ cpu_use = 1
 gpu_use = 1
 
 
-# Since the neuron configuration we want is dependent upon the number of layers we have, we need to work flatten the feature space a bit. We can reduce the high-dminesional setups to a slightly less high-dminesional string of base-n nodes.
-
-# In[110]:
-
-
-# define feature space for hashing
-
-c_min = 3**2
-c_max = 3**5
-f_min = 2**2
-f_max = 2**6
-
-c = c_max - c_min
-f = f_max - f_min
-
-# conv = set(range(c_max)) - set(range(c_min))
-# full = set(range(f_max)) - set(range(f_min))
-conv = range(c_max)[c_min:]
-full = range(f_max)[f_min:]
-
-c_comb = list(combinations_with_replacement(conv,2))
-f_comb = []
-for layers in range(1,4):
-    f_comb += list(combinations_with_replacement(full,layers))
-
-# for conversion from dec to whatever we end up using
-# most to least significant digit
-def numberToBase(n, b):
-    if n == 0:
-        return [0]
-    digits = []
-    while n:
-        digits.append(int(n % b))
-        n //= b
-    rev = digits[::-1]
-    return rev
-
-def feature_spacing():
-    
-    # create empty list to store the 
-    # combinations 
-    unique_combinations = list(combinations([c_comb,f_comb],2))
-    total_uniques = len(unique_combinations)
-    total_points = total_uniques**2
-    total_cvs = len(c_comb)
-    total_fcs = len(f_comb)
-    
-#     print(total_cvs)
-#     print(total_fcs)
-    
-#     print(c_comb[np.random.randint(0,len(c_comb))])
-#     print(f_comb[np.random.randint(0,len(f_comb))])
-
+# #define feature space for hashing
+# def feature_spacing():
+#     conv = set(range(3**5)) - set(range(3**2))
+#     full = set(range(2**5)) - set(range(2**2))
+#     
+#     c = 3**5 - 3**2
+#     f = 2**5 - 2**2
+#     
+#     # create empty list to store the 
+#     # combinations 
+#     unique_combinations = []
+#     total_uniques = 0
+#     total_points = 1
+#     
+#     # do combo
+# #     for combo in product(conv,conv,full):
+# #         unique_combinations.append(combo)
+#         
+# #     for combo in product(conv,conv,full,full):
+# #         unique_combinations.append(combo)
+#         
+# #     for combo in product(conv,conv,full,full,full):
+# #         unique_combinations.append(combo)
+#         
+# #     for combo in product(conv,conv,full,full,full,full):
+# #         unique_combinations.append(combo)
+# 
 #     for ls in range(0,4):
+# #         print(ls)
 #         unique_combinations.append((c**2)*(f*(f+1)**ls))
 #         total_uniques += (c**2)*f*((f+1)**ls)
-#         total_fcs += f*((f+1)**ls)
-    
+# #         total_points = ((c**2)*f*((f+1)**ls))
+#     
 #     total_uniques -= ((c**2)*f)
 #     total_points = total_uniques**2
-    
-#     print("number of combos: %s" % ["%s-fc model: %s" % (l,v) for l,v in enumerate(unique_combinations, 1)])
-#     print("total uniques:",total_uniques)
-#     print("number of points/indices (with sparicities/noise): %s" % total_points)
-#     print("\n")
-    
-    columns = ["base","nodes_req","sparcity","sparcity_pcnt","denoise_pcnt"]
-    values = [1,total_uniques,total_points - total_uniques,(total_points - total_uniques) / total_points,0]
+# #     print("number of combos: %s" % ["%s-fc model: %s" % (l,v) for l,v in enumerate(unique_combinations, 1)])
+# #     print("total uniques:",total_uniques)
+# #     print("number of points/indices (with sparicities/noise): %s" % total_points)
+# #     print("\n")
+#     
+#     columns = ["base","nodes_req","sparcity","sparcity_pcnt","denoise_pcnt"]
+#     values = [1,total_uniques,total_points - total_uniques,(total_points - total_uniques) / total_points,0]
 #     results = {
 #         "base": [1],
 #         "nodes_req": [total_uniques],
 #         "sparcity": [total_points - total_uniques],
-#         "max_necc_base_value":[0],
-#         "nodes+_req": [0],
-#         "subsparcity": [0],
-#         "unexplained":[0],
 #         "sparcity_pcnt": [(total_points - total_uniques) / total_points * 100],
-#         "subsparcity_pcnt": [0],
-#         "denoise_pcnt":[0],
-#         "complexity":[0]
+#         "denoise_pcnt":[0]
 #     }
-    
-    cf = []
-#     print(report.to_string())
-    for layer in [total_cvs,total_fcs]:#,total_uniques]:
-        results = {
-            "base": [1],
-            "nodes_req": [total_uniques],
-            "sparcity": [total_points - total_uniques],
-            "max_necc_base_value":[0],
-            "nodes+_req": [0],
-            "subsparcity": [0],
-            "unexplained":[0],
-            "sparcity_pcnt": [(total_points - total_uniques) / total_points * 100],
-            "subsparcity_pcnt": [0],
-            "denoise_pcnt":[0],
-            "complexity":[0]
-        }
+#     
+#     report = pd.DataFrame(results)
+#     
+# #     print(report.to_string())
+#     
+#     for base in range(2,11):
+#         results["base"] = [base]
+#         results["nodes_req"] = [math.ceil(math.log(total_uniques,(base)))]
+# # #         print("number of base %s complex nodes required:" % (base), math.ceil(math.log(total_uniques,(base))))
+# #         print("number of base %s complex nodes required:" % (base), results["nodes_req"])
+#         results["sparcity"] = [base**math.ceil(math.log(total_uniques,base)) - total_uniques]
+# # #         print("sparcity:",base**math.ceil(math.log(total_uniques,base)) - total_uniques,'points')
+# #         print("sparcity:",results["sparcity"],'points')
+#         results["sparcity_pcnt"] = [(base**math.ceil(math.log(total_uniques,(base))) - base**math.log(total_uniques,(base)))/(base**math.ceil(math.log(total_uniques,(base))))*100]
+# # #         print("sparcity percentage:",(base**math.ceil(math.log(total_uniques,(base))) - base**math.log(total_uniques,(base)))/(base**math.ceil(math.log(total_uniques,(base))))*100,'%')
+# #         print("sparcity percentage:",results["sparcity percentage"],'%')
+# #         print("%s root-%s nodes per layer" % (math.ceil(math.log(total_uniques,base+1)),base+1))
+# #         print("\n")
+#         results["denoise_pcnt"] = [math.floor(((total_points-(math.ceil(math.log(total_uniques,base)))**2)/total_points)*100)]
+# # #         print("noise reduced from total points:",math.floor(((total_points-(math.ceil(math.log(total_uniques,base)))**2)/total_points)*100),'%')
+# #         print("noise reduced from total points:",results["denoise_pcnt"],'%')
+#     
+#         report = report.append(pd.DataFrame(results))
+# #     for root in range(1,8):
+# #         print("ceilinged %s-root (%s-value per number component) of combos with complex numbers: %s\n" % (root*2, root+1, [[math.ceil(combo**(1/(root*2))),"sparsity: %s%s" % ((math.ceil(combo**(1/(root*2))) - combo**(1/(root*2)))/combo**(1/(root*2))*100,'%')] for combo in unique_combinations]))
+#     
+#     print(report.sort_values(["sparcity_pcnt","nodes_req","base"]).to_string())
+# #     report.head()
+#     
+# #     print(len(product(conv,conv,full)))
+# #     print(f1)
+# feature_spacing()
 
-        report = pd.DataFrame(results)
-    
-        for base in range(2,17):
-            results["base"] = [base]
-            results["nodes_req"] = [math.ceil(math.log(layer,(base)))]
-            results["nodes+_req"] = [math.floor(math.log(layer,(base)))]
-            
-            results["sparcity"] = [base**math.ceil(math.log(layer,base)) - layer]
-            results["subsparcity"] = [-(base**math.floor(math.log(layer,base)) - layer)]
-            
-            results["sparcity_pcnt"] = [(base**math.ceil(math.log(layer,(base))) - base**math.log(layer,(base)))/(base**math.ceil(math.log(layer,(base))))*100]
-            results["subsparcity_pcnt"] = [-((base**math.floor(math.log(layer,(base))) - base**math.log(layer,(base)))/(base**math.floor(math.log(layer,(base))))*100)]
-            
-#             results["max_necc_base_value"] = [numberToBase((results["base"][0]**results["nodes+_req"][0]+results["subsparcity"][0]),results["base"][0])]
-            results["max_necc_base_value"] = [numberToBase(layer,base)]
-            results["unexplained"] = [(-(base**math.floor(math.log(layer,base)) - layer))*(math.floor(math.log(layer,(base))))]
-            
-            results["denoise_pcnt"] = [math.floor(((total_points-(math.ceil(math.log(layer,base)))**2)/total_points)*100)]
-        
-            results["complexity"] = [results["nodes_req"][0]*(results["sparcity"][0]+1)]
+# base = 8
+# c = 3**5 - 3**2
+# f = 2**5 - 2**2
+# def decode(code=None):
+#     conv = []
+#     full = []
+#     
+#     print(math.ceil(math.log(c,base)))
+#     print(base**math.ceil(math.log(c,base)) - c)
+#     print(math.ceil(math.log(f,base)))
+#     print(base**math.ceil(math.log(f,base)) - f)
+#     
+#     model = [conv,full]
+# #     return model
+#     print()
+#     
+# decode()
+# [print(math.log(278,b)) for b in range(2,9)]
 
-            report = report.append(pd.DataFrame(results))
-            
-            
-        report.index = [x for x in range(1, len(report.values)+1)]
-#         report.set_index(range(len(report)),inplace=True)
-        report.drop([1],axis=0,inplace=True)
-#         print("value: %s \n" % layer)
-        report.sort_values(["sparcity","unexplained","nodes+_req","subsparcity","sparcity_pcnt","base"],inplace=True)
-#         print(report)
-#         print(report.to_string(),"\n")
-        
-#         print(report.max())
-#         print(report.min())
-        
-#         report_norm = (report + -1 * report.mean()) / (report.max() + -1 * report.min())
-#         print(report_norm.to_string(),"\n")
-        
-        cf.append(report.iloc[0])
-    
-    return cf
+# # math.sqrt(3**5)
+# poss = ((2**5 - 2**2)+1)**3
+# print("%s possibilities" % poss)
+# [print("%s root-%s nodes per layer" % (math.ceil(math.log(poss,root)),root)) for root in range(2,5)]
+# [print("%s root-%s nodes per layer" % (math.log(poss,root),root)) for root in range(2,5)]
+# # print(math.ceil(poss**(1/2)))
+# # print(math.log(poss,2))
 
-# [print(r,"\n") for r in feature_spacing()]
+# (2**5 - 2**2)+1
 
-
-# For the convolutional layers, base 9 seems to allow us to use the fewest nodes with the lowest number of invalid configuration indices (sparcity).
-# For the linear layers, base 16 seems to allow us to use the fewest nodes with the lowest number of invalid configuration indices (sparcity).
+# a = ['1', '2', '3']
+# b = ['1', '2', '3']
+# c = ['1', '2', '3']
+# d = ['1', '2', '3']
 # 
-# We can use the 
+# # for r in product(product(a, b, d),c): print(r)
+# r = [comb for comb in product(a, b, d)]
+# print(r)
 
-# In[112]:
-
-
-bases = feature_spacing()
-
-base_c = bases[0]["base"]
-base_f = bases[1]["base"]
-max_c = bases[0]["max_necc_base_value"]
-max_f = bases[1]["max_necc_base_value"]
-
-def base_to_dec(num_list, base):
-    num_list = num_list[::-1]
-    num = 0
-    for k in range(len(num_list)):
-        dig = num_list[k]
-#         if dig.isdigit():
-#             dig = int(dig)
-        dig = int(dig)
-#         else:    #Assuming its either number or alphabet only
-#             dig = ord(dig.upper())-ord('A')+10
-        num += dig*(base**k)
-    return num
-
-def encode(config=[(24, 64),(13, 18, 41)]):
-    iconv = c_comb.index(config[0])
-    ifull = f_comb.index(config[1])
-    
-    conv_hash = numberToBase(iconv,base_c)
-    full_hash = numberToBase(ifull,base_f)
-    
-    return [conv_hash,full_hash]
-
-# print([(24, 64),(13, 18, 41)])
-# print("to")
-# print(encode([(24, 64),(13, 18, 41)]))
-
-def decode(hash=([1, 7, 5, 0], [2, 0, 4, 3, 4, 4])):
-    conv = base_to_dec(hash[0], base_c)
-    full = base_to_dec(hash[1], base_f)
-
-    
-    return [c_comb[conv],f_comb[full]]
-
-
-# print([[1, 7, 5, 0], [2, 0, 4, 3, 4, 4]])
-# print("to")
-# print(decode())
-
-
-# In[ ]:
+# In[3]:
 
 
 # move data into sets for loading
@@ -263,7 +186,7 @@ def load_data(data_dir=d.absolute()):
     return trainset, testset
 
 
-# In[ ]:
+# In[4]:
 
 
 # dynamically-generated nn that takes a 3-channel image and outputs a label
@@ -308,7 +231,7 @@ class Net(nn.Module):
         return x
 
 
-# In[ ]:
+# In[5]:
 
 
 # train nn on data
@@ -405,7 +328,7 @@ def train_cifar(neuron_config, checkpoint_dir=None):
     print("Finished Training")
 
 
-# In[ ]:
+# In[6]:
 
 
 # get accuracy score
@@ -429,7 +352,7 @@ def test_accuracy(net, device="cpu"):
     return correct / total
 
 
-# In[ ]:
+# In[7]:
 
 
 #determine configuration boundary for nn based on number of layers
@@ -449,7 +372,7 @@ def configure_neurons(num_convs,num_fcs):
     
     for hidden in range(num_fcs):
         config_space.add_hyperparameter(
-            CS.UniformIntegerHyperparameter("fc%s" % hidden, lower=2**2, upper=2**4))
+            CS.UniformIntegerHyperparameter("fc%s" % hidden, lower=2**2, upper=2**6))
         
     return config_space
 
@@ -473,13 +396,13 @@ def configure_neurons(num_convs,num_fcs):
 # neuron_config_space = configure_neurons()
 # print(neuron_config_space)
 
-# In[ ]:
+# In[8]:
 
 
 # perform neuron configuration trials
 def search_neurons(layer_config, checkpoint_dir=None):
-    num_samples=10
-    max_num_epochs=10
+    num_samples=20
+    max_num_epochs=20
     gpus_per_trial=1
     
 #     print(layer_config)
@@ -501,8 +424,8 @@ def search_neurons(layer_config, checkpoint_dir=None):
 #         metric="loss",
 #         mode="min",
         **experiment_metrics)
-    reporter = CLIReporter(
-#         overwrite=True,
+    reporter = JupyterNotebookReporter(
+        overwrite=True,
 #         parameter_columns=["l1", "l2", "lr", "batch_size", "epochs"],
         parameter_columns=neuron_config_space.get_hyperparameter_names(),
         metric_columns=["loss", "accuracy", "training_iteration"])
@@ -534,6 +457,7 @@ def search_neurons(layer_config, checkpoint_dir=None):
 # #     best_trained_model = Net(best_trial.config["l1"], best_trial.config["l2"])
     
 #     best_trained_model = Net(best_trial.config["cvs"], best_trial.config["fcs"])
+    best_trained_model = Net([best_cvs, best_fcs])
     device = "cpu"
     if torch.cuda.is_available():
         device = "cuda:0"
@@ -560,7 +484,7 @@ def search_neurons(layer_config, checkpoint_dir=None):
     return best_trained_model.state_dict()
 
 
-# In[ ]:
+# In[9]:
 
 
 # perform layer count trials
@@ -644,26 +568,20 @@ layer_config_space = {}
 #     layer_config_space[hp] = np.random.randint(2,2**3)
 # layer_config_space["num_convs"] = np.random.randint(2,3)
 layer_config_space["num_convs"] = 2
-layer_config_space["num_fcs"] = np.random.randint(2,2**2)
+layer_config_space["num_fcs"] = np.random.randint(3,2**2)
 
 cpu_use = 1
-gpu_use = 0
+gpu_use = 0.25
 # data_dir = os.path.abspath("/home/grottesco/Source/RayTuneTut/data/")
 # checkpoint_dir = os.path.abspath("/home/grottesco/Source/RayTuneTut/checkpoints")
-    
+print("Resource usage can be viewed at 127.0.0.1:8265")
+start = time.time()
 model = search_neurons(layer_config_space)
+end = time.time()
+
+print("\nProcessed in %s minutes\n" % ((end-start)/60,))
 
 
-# In[ ]:
-
-
-print(model)
-
+# print(model)
 
 # !rm -rf ./data/* ./ray_results/layers/* ./ray_results/neurons/* 
-
-# In[ ]:
-
-
-
-
