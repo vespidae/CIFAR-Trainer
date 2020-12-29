@@ -1,0 +1,126 @@
+Error detected while processing /home/francisn/.vimrc:
+line    7:
+E492: Not an editor command:  ^M
+line   13:
+E492: Not an editor command:  ^M
+line   16:
+E488: Trailing characters: nocompatible^M
+line   17:
+E492: Not an editor command:  ^M
+line   21:
+E475: Invalid argument: on^M
+line   22:
+E492: Not an editor command:  ^M
+line   25:
+E492: Not an editor command:  ^M
+line   26:
+E492: Not an editor command:  ^M
+line   31:
+E492: Not an editor command:  ^M
+line   45:
+E488: Trailing characters: hidden^M
+line   46:
+E492: Not an editor command:  ^M
+line   52:
+E492: Not an editor command:  ^M
+line   54:
+E488: Trailing characters: wildmenu^M
+line   55:
+E492: Not an editor command:  ^M
+line   57:
+E488: Trailing characters: showcmd^M
+line   58:
+E492: Not an editor command:  ^M
+line   61:
+E488: Trailing characters: hlsearch^M
+line   62:
+E492: Not an editor command:  ^M
+line   67:
+E492: Not an editor command:  ^M
+line   68:
+E492: Not an editor command:  ^M
+line   76:
+E492: Not an editor command:  ^M
+line   78:
+E488: Trailing characters: ignorecase^M
+line   79:
+E488: Trailing characters: smartcase^M
+line   80:
+E492: Not an editor command:  ^M
+line   82:
+E474: Invalid argument: backspace=indent,eol,start^M
+line   83:
+E492: Not an editor command:  ^M
+line   86:
+E488: Trailing characters: autoindent^M
+line   87:
+E492: Not an editor command:  ^M
+line   91:
+E488: Trailing characters: nostartofline^M
+line   92:
+E492: Not an editor command:  ^M
+line   95:
+E488: Trailing characters: ruler^M
+line   96:
+E492: Not an editor command:  ^M
+line   98:
+E474: Invalid argument: laststatus=2^M
+line   99:
+E492: Not an editor command:  ^M
+line  102:
+E488: Trailing characters: confirm^M
+line  103:
+E492: Not an editor command:  ^M
+line  105:
+E488: Trailing characters: visualbell^M
+line  106:
+E492: Not an editor command:  ^M
+line  111:
+E492: Not an editor command:  ^M
+line  113:
+E539: Illegal character <^M>: mouse=a^M
+line  114:
+E492: Not an editor command:  ^M
+line  117:
+E474: Invalid argument: cmdheight=2^M
+line  118:
+E492: Not an editor command:  ^M
+line  120:
+E488: Trailing characters: number^M
+line  121:
+E492: Not an editor command:  ^M
+line  123:
+E474: Invalid argument: ttimeoutlen=200^M
+line  124:
+E492: Not an editor command:  ^M
+line  127:
+E492: Not an editor command:  ^M
+line  128:
+E492: Not an editor command:  ^M
+line  133:
+E492: Not an editor command:  ^M
+line  136:
+E474: Invalid argument: shiftwidth=4^M
+line  137:
+E474: Invalid argument: softtabstop=4^M
+line  138:
+E488: Trailing characters: expandtab^M
+line  139:
+E492: Not an editor command:  ^M
+line  144:
+E492: Not an editor command:  ^M
+line  145:
+E492: Not an editor command:  ^M
+line  150:
+E492: Not an editor command:  ^M
+line  154:
+E492: Not an editor command:  ^M
+line  158:
+E492: Not an editor command:  ^M
+line  160:
+E492: Not an editor command:  ^M
+line  161:
+E492: Not an editor command:  ^M
+line  165:
+E185: Cannot find color scheme 'elflord^M'
+Press ENTER or type command to continue
