@@ -1,0 +1,16 @@
+
+ptimizer = optim.SGD(net.parameters(), lr=10**non_arch_config["learning rate {10^1/⌊x⌋}"], momentum=0.9)
+
+    trainset, testset = load_data()
+
+        test_abs = int(len(trainset) * 0.8)
+            train_subset, val_subset = random_split(
+                    trainset, [test_abs, len(trainset) - test_abs])
+
+                        trainloader,valloader = [torch.utils.data.DataLoader(
+                                train_subset,
+                                        batch_size=2**int(non_arch_config["batch size {2^⌊x⌋}"]),
+                                                shuffle=True,
+                                                        num_workers=2) for subset in [train_subset,val_subset]]
+
+                                                            for epoch in range(10*int(non_arch_config["epochs {10⌊x⌋}"])):  # loop over the dataset multiple times

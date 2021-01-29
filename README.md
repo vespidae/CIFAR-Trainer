@@ -12,6 +12,8 @@ BOHB-based model builder for CIFAR CNN
 - pandas
 - hpbandster
 - scikit-learn
+- GPy
+- optuna
 
 ## Demonstration
 Run notebook "AutoML CNN Demo.ipynb" or script "AutoML CNN Demo.py" for a demo.
