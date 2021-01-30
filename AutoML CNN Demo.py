@@ -27,7 +27,6 @@ from torch.utils.data import random_split # for train/test split
 import ray
 from ray import tune # for trialing
 from ray.tune import JupyterNotebookReporter # for trial reporting
-from ray.tune import CLIReporter # for trial reporting
 # from ray.tune.integration.torch import is_distributed_trainable
 # from torch.nn.parallel import DistributedDataParallel
 # from ray.tune.integration.torch import DistributedTrainableCreator
@@ -71,7 +70,7 @@ cpu_use = 1 # number of cpu cores to dedicate to 1 series of trials
 gpu_use = gpus/max_concurrent_trials if gpus else 0
 
 # set experiment hyperparameters
-oom = 8 if gpus else 2 # order of magnitude
+oom = 5 if gpus else 2 # order of magnitude
 num_samples = 2 ** oom
 
 
@@ -374,12 +373,6 @@ def test_accuracy(net, device="cpu"):
     return correct / total
 
 
-# #determine configuration boundary for nn based on number of layers
-# nodes_c = bases[0]["nodes_req"]
-# nodes_f = bases[1]["nodes_req"]
-# max_c = bases[0]["max_necc_base_value"]
-# max_f = bases[1]["max_necc_base_value"]
-
 # In[ ]:
 
 
@@ -457,8 +450,6 @@ def search_training_hyperparameters():
     
     return config_space_dict
 
-
-# print(search_training_hyperparameters())
 
 # In[ ]:
 
@@ -544,8 +535,8 @@ def search_neurons():
     search = ConcurrencyLimiter(
         search,
         max_concurrent=max_concurrent_trials)
-    reporter = CLIReporter(
-#         overwrite=True,
+    reporter = JupyterNotebookReporter(
+        overwrite=True,
         parameter_columns=hpn,
 #         max_progress_rows=num_samples,
         max_report_frequency=10,
@@ -574,7 +565,8 @@ def search_neurons():
         best_trial.last_result["accuracy"]))
 
     best_checkpoint_dir = best_trial.checkpoint.value
-    arch_state, model_state = torch.load(os.path.join(best_checkpoint_dir, "checkpoint"))
+    first, second = torch.load(os.path.join(best_checkpoint_dir, "checkpoint"))
+    arch_state,model_state = *second if (type(second) == tuple) else first,second
 
     best_trained_model = Net(arch_state)
     best_trained_model.load_state_dict(model_state)
