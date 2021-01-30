@@ -566,7 +566,12 @@ def search_neurons():
 
     best_checkpoint_dir = best_trial.checkpoint.value
     first, second = torch.load(os.path.join(best_checkpoint_dir, "checkpoint"))
-    arch_state,model_state = *second if (type(second) == tuple) else first,second
+    
+    arch_state,model_state = {}
+    if (type(second) == tuple): 
+        arch_state,model_state = second
+    else:
+        arch_state,model_state = first,second
 
     best_trained_model = Net(arch_state)
     best_trained_model.load_state_dict(model_state)
