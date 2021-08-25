@@ -70,7 +70,7 @@ cpu_use = 1 # number of cpu cores to dedicate to 1 series of trials
 gpu_use = gpus/max_concurrent_trials if gpus else 0
 
 # set experiment hyperparameters
-oom = 5 if gpus else 2 # order of magnitude
+oom = 6 if gpus else 2 # order of magnitude
 num_samples = 2 ** oom
 
 
@@ -387,7 +387,7 @@ def search_training_hyperparameters():
     }
     epochs = {
         "name":"epochs {10⌊x⌋}",
-        "bounds":[x for x in range(2,6)]
+        "bounds":[x for x in range(2,10)]
     }
     
     config_space = CS.ConfigurationSpace()
@@ -498,14 +498,15 @@ def search_neural_arch(non_arch_config,checkpoint_dir=None):
         study_name=str(non_arch_config),
         sampler=BoTorchSampler(),
         pruner=SuccessiveHalvingPruner(),
-        storage='sqlite:///na.db',
+#         storage='sqlite:///na.db',
+        storage="mysql://root@localhost/example",
         load_if_exists=True
     )
     
     study.optimize(
         partial(train_cifar, non_arch_config),
         n_trials=oom,
-#         n_jobs=2,
+#         n_jobs=4,
         gc_after_trial=True,
         callbacks=[nas_report]
     )
@@ -514,6 +515,7 @@ def search_neural_arch(non_arch_config,checkpoint_dir=None):
 # In[ ]:
 
 
+escape_pod = {}
 # perform neuron configuration trials
 def search_neurons():
     neuron_config_space = search_training_hyperparameters()
@@ -547,7 +549,7 @@ def search_neurons():
         name="neurons",
         local_dir=r.absolute(),
         resources_per_trial={"cpu": cpu_use, "gpu": gpu_use},
-#         max_failures=3,
+        max_failures=3,
         num_samples=num_samples,
         config=neuron_config_space,
         scheduler=scheduler,
@@ -556,6 +558,7 @@ def search_neurons():
         progress_reporter=reporter)
 
     best_trial = result.get_best_trial("accuracy", "max", "last")
+    escape_pod = best_trial
     
 
     print("Best training hyperparameters: {}".format(best_trial.config))
@@ -567,7 +570,7 @@ def search_neurons():
     best_checkpoint_dir = best_trial.checkpoint.value
     first, second = torch.load(os.path.join(best_checkpoint_dir, "checkpoint"))
     
-    arch_state,model_state = {}
+    arch_state,model_state = {},{}
     if (type(second) == tuple): 
         arch_state,model_state = second
     else:
